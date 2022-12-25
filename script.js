@@ -6,7 +6,7 @@ const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
-  clicks = 0;
+  // clicks = 0;
 
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat, lng]
@@ -23,9 +23,9 @@ class Workout {
     } ${this.date.getDate()}`;
   }
 
-  click() {
-    this.clicks++;
-  }
+  // click() {
+  //   this.clicks++;
+  // }
 }
 
 class Running extends Workout {
@@ -64,9 +64,8 @@ class Cycling extends Workout {
 // const run1 = new Running([39, -12], 5.2, 24, 178);
 // const cycling1 = new Cycling([39, -12], 5.2, 27, 95, 523);
 
-// console.log(run1, cycling1);
-
 //--------------------------------------------------------
+
 // APPLICATION ARCHITECTURE
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
@@ -78,12 +77,17 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class App {
   #map;
-  #mapZoomLevel = 15;
+  #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
 
   constructor() {
     this._getPosition();
+
+    // Get data from the local storage
+    this._getLocalStorage();
+
+    //Attaching event handlers
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
@@ -103,14 +107,10 @@ class App {
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
-    console.log(latitude, longitude);
-    console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
 
     const coords = [latitude, longitude];
 
     this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
-
-    console.log(this.#map);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
@@ -119,6 +119,10 @@ class App {
 
     //Handling clicks on the map
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -188,7 +192,6 @@ class App {
 
     //Add object to workout array
     this.#workouts.push(workout);
-    console.log(workout);
 
     //Render the workout on the map as a marker
     this._renderWorkoutMarker(workout);
@@ -201,6 +204,9 @@ class App {
     //Clear input fields
     this._hideForm();
     //Display the marker
+
+    //Set local storage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -272,7 +278,6 @@ class App {
 
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout');
-    console.log(workoutEl);
 
     if (!workoutEl) return; //Guard Clause
 
@@ -288,8 +293,46 @@ class App {
     });
 
     // Using public interface
-    workout.click();
+    // workout.click();
+  }
+  _setLocalStorage() {
+    //JSON.stringify is used to convert any object in javascript to a string
+
+    // Simple storage, use only for small amounts of information
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!data) return; //Guard clause
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(work => {
+      this._renderWorkout(work);
+    });
+  }
+
+  // To clean the local storage using the console by typing app.reset();
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
 const app = new App();
+
+//Additional features:
+/* 
+1. Edit a workout
+2. Delete a workout
+3. Delete ALL workouts
+4. Ability to sort workouts by a certain field
+5. Re-build Running and Cycling from localStorage
+6. More realistic error and confirmation messages.
+7. Position map to show all the workouts (difficult)
+8. Draw lines and shapes (instead of points) - (Complicated)
+9. Geocode location from coordinates (third party API to plug in the coordinates)
+10. Third party API to include weather data for the workout place and time
+*/
