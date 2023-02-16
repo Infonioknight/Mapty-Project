@@ -77,9 +77,10 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class App {
   #map;
-  #mapZoomLevel = 13;
+  #mapZoomLevel = 17;
   #mapEvent;
   #workouts = [];
+  #markers = [];
 
   constructor() {
     this._getPosition();
@@ -91,6 +92,33 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+    containerWorkouts.addEventListener('click', this._deleteWorkout.bind(this));
+  }
+
+  _deleteWorkout(e) {
+    const btn = e.target.closest('.btn--delete-workout');
+    if (!btn) return;
+
+    const workoutEl = e.target.closest('.workout');
+    console.log(workoutEl);
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id
+    );
+
+    //Removing the workout from the 'workouts' array
+    const index = this.#workouts.indexOf(workout);
+    this.#workouts.splice(index, 1);
+
+    //Deleting the workout's DOM Element
+    workoutEl.remove();
+
+    this.#map.removeLayer(this.#markers[index]);
+    this.#markers.splice(index, 1);
+
+    //Editing localStorage by clearing and re-uploading the new 'workouts' array
+    localStorage.removeItem('workouts');
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
   }
 
   _getPosition() {
@@ -211,8 +239,9 @@ class App {
 
   _renderWorkoutMarker(workout) {
     // Displaying the marker
-    L.marker(workout.coords)
-      .addTo(this.#map)
+    const marker = new L.Marker(workout.coords);
+    this.#map.addLayer(marker);
+    marker
       .bindPopup(
         L.popup({
           maxWidth: 250,
@@ -226,11 +255,15 @@ class App {
         `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
       )
       .openPopup();
+    this.#markers.push(marker);
   }
 
   _renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
+      <div class="close-btn-container">
+        <button class="btn--delete-workout">x</button>
+      </div>
       <h2 class="workout__title">${workout.description}</h2>
       <div class="workout__details">
         <span class="workout__icon">${
@@ -326,7 +359,7 @@ const app = new App();
 //Additional features:
 /* 
 1. Edit a workout
-2. Delete a workout
+2. Delete a workout (done!)
 3. Delete ALL workouts
 4. Ability to sort workouts by a certain field
 5. Re-build Running and Cycling from localStorage

@@ -49,6 +49,25 @@ a:visited {
   flex-direction: column;
 }
 
+.btn--delete-workout {
+  color: #777;
+  font: 16px/100% arial, sans-serif;
+  border: 0px;
+  background-color: var(--color-dark--2);
+  width: 16px;
+  text-decoration: none;
+  text-shadow: 0 1px 0 #fff;
+  top: 5px;
+  height: 16px;
+}
+
+.close-btn-container {
+  width: 100%;
+  grid-column: 1 / -1;
+  text-align: right;
+  height: 10px;
+}
+
 .logo {
   height: 5.2rem;
   align-self: center;
@@ -69,7 +88,7 @@ a:visited {
 .workout {
   background-color: var(--color-dark--2);
   border-radius: 5px;
-  padding: 1.5rem 2.25rem;
+  padding: 1.1rem 1.75rem;
   margin-bottom: 1.75rem;
   cursor: pointer;
 
@@ -85,7 +104,7 @@ a:visited {
 }
 
 .workout__title {
-  font-size: 1.7rem;
+  font-size: 2rem;
   font-weight: 600;
   grid-column: 1 / -1;
 }
