@@ -74,6 +74,7 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+const containerClearAll = document.querySelector('.clear-all-container');
 
 class App {
   #map;
@@ -93,6 +94,10 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     containerWorkouts.addEventListener('click', this._deleteWorkout.bind(this));
+    containerClearAll.addEventListener(
+      'click',
+      this._deleteAllWorkouts.bind(this)
+    );
   }
 
   _deleteWorkout(e) {
@@ -100,8 +105,8 @@ class App {
     if (!btn) return;
 
     const workoutEl = e.target.closest('.workout');
-    console.log(workoutEl);
 
+    //Finding the workout with correct ID
     const workout = this.#workouts.find(
       work => work.id === workoutEl.dataset.id
     );
@@ -113,12 +118,32 @@ class App {
     //Deleting the workout's DOM Element
     workoutEl.remove();
 
+    //Deleting marker from the map
     this.#map.removeLayer(this.#markers[index]);
     this.#markers.splice(index, 1);
 
     //Editing localStorage by clearing and re-uploading the new 'workouts' array
     localStorage.removeItem('workouts');
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _deleteAllWorkouts(e) {
+    const btn = e.target.closest('.clear-all-btn');
+    if (!btn) return; //Guard clause
+
+    //Delete all the workout blocks
+    const workoutElements = document.querySelectorAll('.workout');
+    workoutElements.forEach(element => element.remove());
+
+    // //Clearing all workout data
+    this.#workouts = [];
+
+    // //Removing markers
+    this.#markers.forEach(marker => this.#map.removeLayer(marker));
+    this.#markers = [];
+
+    // //Wiping LocalStorage
+    localStorage.removeItem('workouts');
   }
 
   _getPosition() {
@@ -261,7 +286,7 @@ class App {
   _renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
-      <div class="close-btn-container">
+      <div class="delete-btn-container">
         <button class="btn--delete-workout">x</button>
       </div>
       <h2 class="workout__title">${workout.description}</h2>

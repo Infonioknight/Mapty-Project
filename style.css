@@ -7,6 +7,8 @@
   --color-light--1: #aaa;
   --color-light--2: #ececec;
   --color-light--3: rgb(214, 222, 224);
+
+  --color-light--delete: #ed8b89;
 }
 
 * {
@@ -61,7 +63,7 @@ a:visited {
   height: 16px;
 }
 
-.close-btn-container {
+.delete-btn-container {
   width: 100%;
   grid-column: 1 / -1;
   text-align: right;
@@ -188,6 +190,21 @@ a:visited {
 
 .form__btn {
   display: none;
+}
+
+.clear-all-container {
+  text-align: center;
+  padding: 16px;
+}
+
+.clear-all-btn {
+  font-size: 1.5rem;
+  height: 36px;
+  width: 50%;
+  border-radius: 8px;
+  background-color: var(--color-light--delete);
+  color: #fffdd0;
+  cursor: pointer;
 }
 
 .copyright {
